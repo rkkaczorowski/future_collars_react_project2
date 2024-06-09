@@ -1,25 +1,50 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import CurrencyForm from "./components/CurrencyForm";
+import Result from "./components/Result";
+import Loader from "./components/Loader";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+	const [loading, setLoading] = useState(false);
+	const [result, setResult] = useState("");
+	const [error, setError] = useState("");
+
+	const handleResult = (data) => {
+		setResult(data);
+		setLoading(false);
+	};
+
+	const handleSubmit = async (formData) => {
+		setLoading(true);
+		setError(""); // Reset błędu przy nowym zapytaniu
+		try {
+			const response = await fetch(
+				`https://api.nbp.pl/api/exchangerates/rates/a/${formData.currency}/?format=json`
+			);
+			const data = await response.json();
+			if (!data.rates || !data.rates.length) {
+				throw new Error("Nie udało się pobrać kursu waluty");
+			}
+			const exchangeRate = data.rates[0].mid;
+			const result = formData.amount * exchangeRate;
+			handleResult(
+				`${formData.amount} ${formData.currency} to ${result.toFixed(2)} PLN`
+			);
+		} catch (error) {
+			console.error("Wystąpił błąd:", error);
+			setError("Wystąpił błąd. Spróbuj ponownie później.");
+			setLoading(false);
+		}
+	};
+
+	return (
+		<div className="container">
+			<div className="logo"></div>
+			<h1 className="title">Przelicznik Walut</h1>
+			<CurrencyForm onSubmit={handleSubmit} loading={loading} />
+			<Result result={result} error={error} />
+			<Loader loading={loading} />
+		</div>
+	);
 }
 
 export default App;
