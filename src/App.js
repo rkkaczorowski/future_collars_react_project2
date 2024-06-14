@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import CurrencyForm from "./components/CurrencyForm";
-import Result from "./components/Result";
-import Loader from "./components/Loader";
+import CurrencyForm from "./components/CurrencyForm/CurrencyForm";
+import Result from "./components/Result/Result";
+import Loader from "./components/Loader/Loader";
 
 function App() {
 	const [loading, setLoading] = useState(false);
@@ -10,12 +10,12 @@ function App() {
 
 	const handleResult = (data) => {
 		setResult(data);
-		setLoading(false);
 	};
 
 	const handleSubmit = async (formData) => {
 		setLoading(true);
-		setError(""); // Reset błędu przy nowym zapytaniu
+		setResult("");
+		setError("");
 		try {
 			const response = await fetch(
 				`https://api.nbp.pl/api/exchangerates/rates/a/${formData.currency}/?format=json`
@@ -32,14 +32,17 @@ function App() {
 		} catch (error) {
 			console.error("Wystąpił błąd:", error);
 			setError("Wystąpił błąd. Spróbuj ponownie później.");
+		} finally {
 			setLoading(false);
 		}
 	};
 
 	return (
 		<div className="container">
-			<div className="logo"></div>
-			<h1 className="title">Przelicznik Walut</h1>
+			<header>
+				<div className="logo"></div>
+				<h1 className="title">Przelicznik Walut</h1>
+			</header>
 			<CurrencyForm onSubmit={handleSubmit} loading={loading} />
 			<Result result={result} error={error} />
 			<Loader loading={loading} />

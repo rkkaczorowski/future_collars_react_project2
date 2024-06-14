@@ -1,15 +1,23 @@
-import React, { useState } from "react";
+import "./CurrencyForm.css";
 
 function CurrencyForm({ onSubmit, loading }) {
-	const [formData, setFormData] = useState({ currency: "EUR", amount: "" });
-
-	const handleChange = (event) => {
-		const { name, value } = event.target;
-		setFormData({ ...formData, [name]: value });
-	};
-
 	const handleSubmit = (event) => {
 		event.preventDefault();
+
+		const currency = event.target.currency.value;
+		const amount = parseFloat(event.target.amount.value);
+
+		if (!currency) {
+			alert("Proszę wybrać walutę.");
+			return;
+		}
+
+		if (isNaN(amount) || amount <= 0) {
+			alert("Proszę podać poprawną kwotę większą od zera.");
+			return;
+		}
+
+		const formData = { currency, amount };
 		onSubmit(formData);
 	};
 
@@ -23,10 +31,9 @@ function CurrencyForm({ onSubmit, loading }) {
 					id="currency"
 					name="currency"
 					className="select-currency"
-					value={formData.currency}
-					onChange={handleChange}
 					disabled={loading}
 				>
+					<option value="">Wybierz...</option>
 					<option value="EUR">Euro</option>
 					<option value="USD">Dolary amerykańskie</option>
 					<option value="CHF">Franki szwajcarskie</option>
@@ -43,8 +50,6 @@ function CurrencyForm({ onSubmit, loading }) {
 					min="0.01"
 					step="0.01"
 					className="input-amount"
-					value={formData.amount}
-					onChange={handleChange}
 					disabled={loading}
 				/>
 			</div>
